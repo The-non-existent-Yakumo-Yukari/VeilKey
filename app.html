@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeniableCipher</title>
+<style>
+  /* ── tokens ───────────────────────────────────────────────────────
+     "blueprint / vault console" — right-angle nesting, no rounded corners:
+       * every corner is 0°; depth comes from nested hairline frames,
+         offset step-borders and hard 4px offset shadows
+       * panels carry corner crop-marks and a doubled inner frame
+       * focused inputs get a hard amber left edge; active tabs get a
+         corner tick + hard underline; primary buttons drop a hard shadow
+  */
+  :root {
+    --ground: #0A0B0F;
+    --surface-1: #12141A;
+    --surface-2: #191C23;
+    --surface-3: #21252E;
+    --hairline: rgba(255, 255, 255, 0.08);
+    --hairline-strong: rgba(255, 255, 255, 0.16);
+    --text-1: #F2F3F5;
+    --text-2: #9BA1AD;
+    --text-3: #636A78;
+    --accent: #C9A35B;
+    --accent-strong: #DDBB76;
+    --accent-ink: #16100A;
+    --accent-soft: rgba(201, 163, 91, 0.14);
+    --ok: #6FBF8B;
+    --bad: #E0786F;
+    --mono: "Cascadia Code", "Cascadia Mono", Consolas, ui-monospace, monospace;
+    --sans: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+    --hard: 4px 4px 0 rgba(0, 0, 0, 0.55);
+    --ease-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    color: var(--text-1);
+    font: 14px/1.55 var(--sans);
+    background:
+      radial-gradient(1200px 420px at 50% -10%, rgba(201, 163, 91, 0.06), transparent 60%),
+      radial-gradient(900px 520px at 88% -20%, rgba(96, 126, 200, 0.05), transparent 55%),
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.014) 0 1px, transparent 1px 48px),
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.014) 0 1px, transparent 1px 48px),
+      var(--ground);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection { background: var(--accent-soft); color: var(--text-1); }
+
+  /* outer nested frame: content inset from a second hairline rectangle */
+  .app {
+    max-width: 860px;
+    margin: 32px auto 48px;
+    padding: 24px;
+    border: 1px solid var(--hairline);
+    box-shadow: 0 0 0 7px var(--ground), 0 0 0 8px var(--hairline-strong);
+    background: transparent;
+  }
+  @media (max-width: 900px) { .app { margin: 0 auto; box-shadow: none; border: 0; } }
+
+  /* ── header ────────────────────────────────────────────────────── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 18px;
+    margin-bottom: 4px;
+    border-bottom: 2px solid var(--hairline-strong);
+    flex-wrap: wrap;
+  }
+
+  .brand { display: flex; align-items: center; gap: 14px; }
+
+  .brand .mark {
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    border: 1px solid var(--hairline-strong);
+    border-left: 3px solid var(--accent);
+    background: linear-gradient(180deg, var(--surface-3), var(--surface-1));
+    color: var(--accent);
+    box-shadow: var(--hard);
+  }
+
+  .brand h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .brand p { margin: 1px 0 0; font-size: 12.5px; color: var(--text-3); }
+
+  .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .local-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text-2);
+    border: 1px solid var(--hairline);
+    background: var(--surface-1);
+    padding: 6px 11px;
+  }
+  .local-chip .dot {
+    width: 7px; height: 7px;
+    background: var(--ok);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .keylen {
+    display: inline-flex; align-items: center; gap: 7px;
+    font: 600 12px var(--mono);
+    color: var(--text-3);
+    border: 1px solid var(--hairline);
+    background: var(--surface-1);
+    padding: 4px 8px;
+  }
+  .keylen select {
+    font: 600 12px var(--mono);
+    color: var(--accent-strong);
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    padding: 2px 4px;
+    cursor: pointer;
+  }
+  .keylen select:focus { outline: 1px solid var(--accent); }
+
+  .lang-toggle {
+    display: inline-flex;
+    border: 1px solid var(--hairline);
+    background: var(--surface-1);
+  }
+  .lang-toggle button {
+    font: 600 12px var(--sans);
+    color: var(--text-3);
+    background: transparent;
+    border: 0;
+    border-right: 1px solid var(--hairline);
+    padding: 7px 12px;
+    cursor: pointer;
+    transition: color 150ms ease-out, background 150ms ease-out;
+  }
+  .lang-toggle button:last-child { border-right: 0; }
+  .lang-toggle button:hover { color: var(--text-1); background: var(--surface-2); }
+  .lang-toggle button[aria-pressed="true"] {
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    box-shadow: inset 0 -2px 0 var(--accent);
+  }
+
+  /* ── tabs ──────────────────────────────────────────────────────── */
+  nav.tabs {
+    display: flex;
+    margin: 22px 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+  nav.tabs button {
+    position: relative;
+    font: 600 13px var(--sans);
+    color: var(--text-3);
+    background: transparent;
+    border: 0;
+    border-right: 1px solid var(--hairline);
+    padding: 9px 18px;
+    margin-bottom: -1px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 150ms ease-out, background 150ms ease-out;
+  }
+  nav.tabs button:hover { color: var(--text-1); background: var(--surface-1); }
+  nav.tabs button[aria-selected="true"] {
+    color: var(--text-1);
+    border-bottom-color: var(--accent);
+    background: var(--surface-1);
+  }
+  /* corner tick marks the active tab */
+  nav.tabs button[aria-selected="true"]::before {
+    content: "";
+    position: absolute;
+    top: -1px; left: 0;
+    width: 7px; height: 7px;
+    background: var(--accent);
+  }
+  nav.tabs button[aria-selected="true"]::after {
+    content: "";
+    position: absolute;
+    bottom: -2px; right: 0;
+    width: 7px; height: 2px;
+    background: var(--accent);
+  }
+
+  /* ── panels ────────────────────────────────────────────────────── */
+  .panel {
+    position: relative;
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  /* crop-marks: nested right-angle corner brackets */
+  .panel::before, .panel::after {
+    content: "";
+    position: absolute;
+    width: 10px; height: 10px;
+    pointer-events: none;
+  }
+  .panel::before {
+    top: -1px; left: -1px;
+    border-top: 2px solid var(--accent);
+    border-left: 2px solid var(--accent);
+  }
+  .panel::after {
+    bottom: -1px; right: -1px;
+    border-bottom: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
+  }
+  .panel h2 {
+    margin: 0 0 16px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-1);
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .panel-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 16px;
+  }
+  /* hard indicator square before titles */
+  .panel-head h2::before {
+    content: "";
+    width: 8px; height: 8px;
+    background: var(--accent);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+    flex: none;
+  }
+
+  .panel-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
+  .meta { font: 12px var(--mono); color: var(--text-3); }
+
+  /* ── rows ──────────────────────────────────────────────────────── */
+  .rows { display: flex; flex-direction: column; gap: 10px; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 250px 40px 30px;
+    gap: 8px;
+    align-items: stretch;
+    padding: 8px;
+    border: 1px solid var(--hairline);
+    background: rgba(255, 255, 255, 0.012);
+  }
+  .row textarea.msg {
+    min-height: 64px;
+    resize: vertical;
+    font-family: var(--sans);
+  }
+  .row input.key { font-family: var(--mono); }
+  .row .keywrap { display: flex; flex-direction: column; gap: 4px; align-self: end; }
+  .keymeta {
+    font: 11px var(--mono);
+    color: var(--text-3);
+    min-height: 14px;
+    word-break: break-all;
+  }
+  .keymeta.warn { color: var(--accent-strong); }
+
+  /* ── form controls ─────────────────────────────────────────────── */
+  textarea, input {
+    width: 100%;
+    color: var(--text-1);
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    padding: 9px 11px;
+    font-size: 13px;
+    line-height: 1.5;
+    transition: border-color 150ms ease-out, background 150ms ease-out,
+                box-shadow 150ms ease-out;
+  }
+  textarea::placeholder, input::placeholder { color: var(--text-3); }
+  textarea:focus, input:focus {
+    outline: none;
+    border-color: var(--hairline-strong);
+    background: var(--surface-3);
+    box-shadow: -3px 0 0 0 var(--accent);
+  }
+  textarea[readonly] { color: var(--text-2); background: var(--surface-1); }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    align-self: end;
+    display: grid; place-items: center;
+    font-size: 15px;
+    color: var(--text-3);
+    background: transparent;
+    border: 1px solid var(--hairline);
+    cursor: pointer;
+    transition: color 150ms ease-out, background 150ms ease-out,
+                border-color 150ms ease-out, box-shadow 80ms ease-out;
+  }
+  .icon-btn:hover { color: var(--text-1); background: var(--surface-3); border-color: var(--hairline-strong); box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5); }
+  .icon-btn.remove:hover { color: var(--bad); border-color: rgba(224, 120, 111, 0.5); box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5); }
+
+  .btn {
+    font: 600 13px var(--sans);
+    padding: 8px 14px;
+    cursor: pointer;
+    border: 1px solid var(--hairline);
+    transition: background 150ms ease-out, color 150ms ease-out,
+                border-color 150ms ease-out, box-shadow 80ms ease-out,
+                transform 80ms ease-out;
+  }
+  .btn:active { transform: translate(2px, 2px); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: 1px solid var(--accent-strong);
+    box-shadow: var(--hard);
+    padding: 10px 22px;
+    font-size: 14px;
+  }
+  .btn-primary:hover { background: var(--accent-strong); box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55); transform: translate(2px, 2px); }
+  .btn-primary:focus-visible { outline: 1px solid var(--accent-strong); outline-offset: 2px; }
+
+  .btn-ghost {
+    color: var(--text-2);
+    background: transparent;
+    border: 1px solid var(--hairline);
+  }
+  .btn-ghost:hover { color: var(--text-1); background: var(--surface-2); border-color: var(--hairline-strong); }
+
+  .primary-row { margin-top: 16px; display: flex; justify-content: flex-end; }
+
+  /* ── options grid ──────────────────────────────────────────────── */
+  .options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 2px solid var(--hairline-strong);
+  }
+  .options label, .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-3);
+  }
+  .options label > span, .field > span { display: flex; align-items: center; gap: 6px; }
+  .options label > span::before, .field > span::before {
+    content: "";
+    width: 5px; height: 5px;
+    background: var(--text-3);
+    flex: none;
+  }
+  .field { margin-top: 12px; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .two-col .field { margin-top: 12px; }
+
+  /* ── error / warn / busy ───────────────────────────────────────── */
+  .error {
+    margin-top: 12px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--bad);
+    border: 1px solid rgba(224, 120, 111, 0.4);
+    border-left: 3px solid var(--bad);
+    background: rgba(224, 120, 111, 0.07);
+    word-break: break-word;
+  }
+
+  .warn-line {
+    margin-top: 12px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--accent-strong);
+    border: 1px solid rgba(201, 163, 91, 0.4);
+    border-left: 3px solid var(--accent);
+    background: rgba(201, 163, 91, 0.07);
+    word-break: break-word;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 10px; height: 10px;
+    margin-right: 8px;
+    border: 2px solid rgba(22, 16, 10, 0.35);
+    border-top-color: var(--accent-ink);
+    animation: spin 0.7s linear infinite;
+    vertical-align: -1px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── output ────────────────────────────────────────────────────── */
+  #output {
+    font-family: var(--mono);
+    font-size: 12px;
+    min-height: 120px;
+    resize: vertical;
+  }
+  #dec-output { min-height: 90px; resize: vertical; }
+
+  #dec-result h2 { margin-bottom: 10px; }
+  .result-ok h2 { color: var(--ok); }
+  .result-fail h2 { color: var(--bad); }
+  .hex-note { font-size: 12px; color: var(--text-3); margin: 8px 0 0; font-family: var(--mono); }
+
+  /* ── threat explainer ──────────────────────────────────────────── */
+  details.threat {
+    border: 1px solid var(--hairline);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+    background: var(--surface-1);
+    margin-top: 4px;
+  }
+  details.threat summary {
+    cursor: pointer;
+    padding: 13px 16px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-2);
+    list-style: none;
+    user-select: none;
+  }
+  details.threat summary::-webkit-details-marker { display: none; }
+  details.threat summary::before {
+    content: "";
+    display: inline-block;
+    width: 7px; height: 7px;
+    margin-right: 10px;
+    background: var(--accent);
+    vertical-align: 1px;
+  }
+  details.threat[open] summary { border-bottom: 1px solid var(--hairline); }
+  details.threat p {
+    margin: 0;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--text-2);
+    line-height: 1.7;
+  }
+
+  /* ── info stats ────────────────────────────────────────────────── */
+  .plan-result {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .stat {
+    border: 1px solid var(--hairline);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+    background: var(--surface-2);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat span { font-size: 12px; color: var(--text-3); }
+  .stat strong { font: 600 18px var(--mono); letter-spacing: -0.01em; }
+
+  /* ── help ──────────────────────────────────────────────────────── */
+  #help-list { margin-top: 2px; }
+  .help-group {
+    border-left: 2px solid var(--hairline-strong);
+    margin: 0 0 20px 3px;
+    padding: 0 0 2px 16px;
+  }
+  .help-group h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: 600 13px var(--sans);
+    margin: 0 0 8px;
+    color: var(--text-1);
+  }
+  .help-group h3::before {
+    content: "";
+    width: 7px; height: 7px;
+    background: var(--accent);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+  }
+  .help-item {
+    display: grid;
+    grid-template-columns: 150px 1fr 1.15fr;
+    gap: 12px;
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  .help-item:last-child { border-bottom: 0; }
+  .help-name { font: 600 12.5px var(--mono); color: var(--accent-strong); word-break: break-word; }
+  .help-desc { font-size: 12.5px; color: var(--text-2); line-height: 1.6; }
+  .help-effect { font-size: 12.5px; color: var(--text-3); line-height: 1.6; }
+  .help-effect::before { content: "→"; margin-right: 6px; color: var(--accent); font-family: var(--mono); }
+
+  /* ── footer ────────────────────────────────────────────────────── */
+  footer {
+    margin-top: 24px;
+    padding-top: 14px;
+    border-top: 2px solid var(--hairline-strong);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-3);
+    text-align: center;
+  }
+
+  /* ── tab switching ─────────────────────────────────────────────── */
+  .tab { display: none; }
+  .tab.active { display: block; animation: fade 240ms var(--ease-quint); }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ── responsive ────────────────────────────────────────────────── */
+  @media (max-width: 720px) {
+    .row { grid-template-columns: 1fr; }
+    .row .icon-btn { align-self: center; }
+    .options { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .plan-result { grid-template-columns: 1fr; }
+    .help-item { grid-template-columns: 1fr; gap: 3px; }
+    .app { padding: 16px 12px 40px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="11" width="14" height="9" rx="2"></rect>
+            <path d="M8 11V8a4 4 0 0 1 8 0v3"></path>
+            <circle cx="12" cy="15.5" r="1.4" fill="currentColor" stroke="none"></circle>
+          </svg>
+        </div>
+        <div>
+          <h1>DeniableCipher</h1>
+          <p data-i18n="tagline"></p>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="local-chip"><span class="dot"></span><span data-i18n="localChip"></span></span>
+        <label class="keylen" data-i18n-title="keylenTitle">
+          <span data-i18n="keylenLabel"></span>
+          <select id="opt-key-bits">
+            <option value="16">16</option>
+            <option value="32">32</option>
+            <option value="64">64</option>
+            <option value="128">128</option>
+            <option value="256" selected>256</option>
+            <option value="512">512</option>
+          </select>
+        </label>
+        <div class="lang-toggle" role="group" aria-label="language">
+          <button data-lang="zh" aria-pressed="true">中文</button>
+          <button data-lang="en" aria-pressed="false">EN</button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button data-tab="encrypt" role="tab" aria-selected="true" data-i18n="tabEncrypt"></button>
+      <button data-tab="decrypt" role="tab" aria-selected="false" data-i18n="tabDecrypt"></button>
+      <button data-tab="info" role="tab" aria-selected="false" data-i18n="tabInfo"></button>
+      <button data-tab="help" role="tab" aria-selected="false" data-i18n="tabHelp"></button>
+    </nav>
+
+    <main>
+      <!-- ════════ Encrypt ════════ -->
+      <section id="tab-encrypt" class="tab active" role="tabpanel">
+        <div class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="encTitle"></h2>
+            <div class="panel-actions">
+              <button class="btn btn-ghost" id="btn-add" data-i18n="btnAdd"></button>
+              <button class="btn btn-ghost" id="btn-random-all" data-i18n="btnRandomAll"></button>
+            </div>
+          </div>
+
+          <div class="rows" id="rows"></div>
+
+          <div class="options">
+            <label><span data-i18n="optPadTo"></span>
+              <input id="opt-pad-to" type="number" min="5" step="1" placeholder="auto">
+            </label>
+            <label><span data-i18n="optSize"></span>
+              <input id="opt-size" type="number" min="256" step="1" placeholder="auto">
+            </label>
+            <label><span data-i18n="optAad"></span>
+              <input id="opt-aad" class="mono" spellcheck="false" placeholder="hex">
+            </label>
+          </div>
+
+          <div class="primary-row">
+            <button class="btn btn-primary" id="btn-encrypt" data-i18n="btnEncrypt"></button>
+          </div>
+          <div class="error" id="enc-error" hidden></div>
+          <div class="warn-line" id="enc-warn" data-i18n="customKeyWarn" hidden></div>
+        </div>
+
+        <div class="panel" id="output-panel" hidden>
+          <div class="panel-head">
+            <h2 data-i18n="outputTitle"></h2>
+            <div class="panel-actions">
+              <span class="meta" id="output-meta"></span>
+              <button class="btn btn-ghost" id="btn-copy" data-i18n="btnCopy"></button>
+              <button class="btn btn-ghost" id="btn-save" data-i18n="btnSave"></button>
+            </div>
+          </div>
+          <textarea id="output" readonly spellcheck="false"></textarea>
+        </div>
+
+        <details class="threat">
+          <summary data-i18n="threatTitle"></summary>
+          <p data-i18n="threatBody"></p>
+        </details>
+      </section>
+
+      <!-- ════════ Decrypt ════════ -->
+      <section id="tab-decrypt" class="tab" role="tabpanel">
+        <div class="panel">
+          <h2 data-i18n="decTitle"></h2>
+          <label class="field"><span data-i18n="decContainer"></span>
+            <textarea id="dec-container" spellcheck="false" data-i18n-ph="phB64"></textarea>
+          </label>
+          <div class="two-col">
+            <label class="field"><span data-i18n="decKey"></span>
+              <input id="dec-key" class="mono" spellcheck="false" data-i18n-ph="phKey">
+              <span class="keymeta" id="dec-keymeta"></span>
+            </label>
+            <label class="field"><span>AAD</span>
+              <input id="dec-aad" class="mono" spellcheck="false" placeholder="hex">
+            </label>
+          </div>
+          <div class="primary-row">
+            <button class="btn btn-primary" id="btn-decrypt" data-i18n="btnDecrypt"></button>
+          </div>
+          <div class="error" id="dec-error" hidden></div>
+        </div>
+
+        <div class="panel" id="dec-result" hidden>
+          <div class="panel-head">
+            <h2 id="dec-result-title"></h2>
+          </div>
+          <textarea id="dec-output" readonly spellcheck="false"></textarea>
+          <p class="hex-note" id="dec-hex-note" hidden></p>
+        </div>
+      </section>
+
+      <!-- ════════ Info / plan ════════ -->
+      <section id="tab-info" class="tab" role="tabpanel">
+        <div class="panel">
+          <h2 data-i18n="infoTitle"></h2>
+          <div class="two-col">
+            <label class="field"><span data-i18n="infoLengths"></span>
+              <input id="info-lengths" class="mono" spellcheck="false" placeholder="100, 50, 50">
+            </label>
+            <label class="field"><span data-i18n="infoPadTo"></span>
+              <input id="info-pad-to" type="number" min="5" step="1" placeholder="auto">
+            </label>
+          </div>
+          <div class="primary-row">
+            <button class="btn btn-primary" id="btn-plan" data-i18n="btnPlan"></button>
+          </div>
+          <div class="plan-result">
+            <div class="stat"><span data-i18n="minContainer"></span><strong id="plan-min">—</strong></div>
+            <div class="stat"><span data-i18n="maxContainer"></span><strong id="plan-max">—</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════ Help ════════ -->
+      <section id="tab-help" class="tab" role="tabpanel">
+        <div class="panel">
+          <div class="panel-head">
+            <h2 data-i18n="helpTitle"></h2>
+          </div>
+          <div id="help-list"></div>
+        </div>
+        <details class="threat">
+          <summary data-i18n="threatTitle"></summary>
+          <p data-i18n="threatBody"></p>
+        </details>
+      </section>
+    </main>
+
+    <footer>
+      <span data-i18n="footer"></span>
+      <button class="btn btn-ghost" id="btn-shutdown" data-i18n="btnShutdown"></button>
+    </footer>
+  </div>
+
+  <script src="crypto.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

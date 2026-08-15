@@ -1,0 +1,18 @@
+# Python bytecode / caches
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# PyInstaller build artifacts
+build/
+*.manifest
+
+# Packaged executable (upload via a GitHub Release instead of committing)
+dist/
+
+# Runtime error log (written next to the exe by --noconsole builds)
+deniable_error.log
+
+# Editor / OS cruft
+.DS_Store
+Thumbs.db
