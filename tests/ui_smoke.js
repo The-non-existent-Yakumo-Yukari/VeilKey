@@ -69,6 +69,17 @@ function ok(cond, label) {
   ok(typeof w.DeniableMulti === "object", "crypto.js exposed DeniableMulti");
   ok(d.querySelector("#output-panel").hidden, "output hidden initially");
 
+  // ── PoC banner (i18n) ──
+  const banner = d.querySelector(".poc-banner");
+  ok(!!banner && banner.textContent.indexOf("PoC") !== -1,
+    "PoC banner present (zh render)");
+  d.querySelector('.lang-toggle button[data-lang="en"]').click();
+  ok(d.querySelector(".poc-banner").textContent.indexOf("unaudited") !== -1,
+    "PoC banner switches to EN");
+  d.querySelector('.lang-toggle button[data-lang="zh"]').click();
+  ok(d.querySelector(".poc-banner").textContent.indexOf("PoC") !== -1,
+    "PoC banner back to zh");
+
   // ── language toggle ──
   d.querySelector('.lang-toggle button[data-lang="en"]').click();
   ok(d.querySelector('[data-i18n="tagline"]').textContent === "N-key deniable encryption",

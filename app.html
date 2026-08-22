@@ -406,6 +406,19 @@
     word-break: break-word;
   }
 
+  .poc-banner {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #F2C46B;
+    border: 1px solid rgba(224, 120, 111, 0.55);
+    border-left: 4px solid var(--bad);
+    background: linear-gradient(90deg, rgba(224, 120, 111, 0.12), rgba(224, 120, 111, 0.04));
+    word-break: break-word;
+  }
+  .poc-banner a { color: #F2C46B; text-decoration: underline; }
+
   .spinner {
     display: inline-block;
     width: 10px; height: 10px;
@@ -588,6 +601,8 @@
         </div>
       </div>
     </header>
+
+    <div class="poc-banner" data-i18n="pocBanner">⚠ Proof of concept (PoC): unaudited cryptography. Do not use for real secrets.</div>
 
     <nav class="tabs" role="tablist">
       <button data-tab="encrypt" role="tab" aria-selected="true" data-i18n="tabEncrypt"></button>

@@ -1,0 +1,260 @@
+{
+  "meta": {
+    "impl": "crypto.js (WebCrypto / browser + Node >= 20)",
+    "node": "v24.13.0",
+    "cpu": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+    "arch": "x64",
+    "note": "median of 3 runs, wall-clock ms; heapUsed delta (KiB) as an approximate per-op memory marker",
+    "date": "2026-08-22T12:54:35.355Z"
+  },
+  "dimensions": {
+    "slots": [
+      {
+        "slots": 1,
+        "keyBits": 256,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 1536,
+        "encrypt_ms": 0.631,
+        "encrypt_heapKiB": 399,
+        "decrypt_ms": 0.483,
+        "decrypt_heapKiB": -340
+      },
+      {
+        "slots": 2,
+        "keyBits": 256,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 1792,
+        "encrypt_ms": 1.189,
+        "encrypt_heapKiB": -199,
+        "decrypt_ms": 0.374,
+        "decrypt_heapKiB": 328
+      },
+      {
+        "slots": 4,
+        "keyBits": 256,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 2048,
+        "encrypt_ms": 1.386,
+        "encrypt_heapKiB": 80,
+        "decrypt_ms": 0.603,
+        "decrypt_heapKiB": -1040
+      },
+      {
+        "slots": 8,
+        "keyBits": 256,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 3840,
+        "encrypt_ms": 2.751,
+        "encrypt_heapKiB": 348,
+        "decrypt_ms": 0.362,
+        "decrypt_heapKiB": -1046
+      },
+      {
+        "slots": 16,
+        "keyBits": 256,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 6656,
+        "encrypt_ms": 4.527,
+        "encrypt_heapKiB": -789,
+        "decrypt_ms": 0.44,
+        "decrypt_heapKiB": 788
+      },
+      {
+        "slots": 32,
+        "keyBits": 256,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 13568,
+        "encrypt_ms": 9.012,
+        "encrypt_heapKiB": 1762,
+        "decrypt_ms": 0.685,
+        "decrypt_heapKiB": -1772
+      }
+    ],
+    "msgSize": [
+      {
+        "slots": 4,
+        "keyBits": 256,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": null,
+        "containerBytes": 2048,
+        "encrypt_ms": 1.487,
+        "encrypt_heapKiB": 1015,
+        "decrypt_ms": 0.38,
+        "decrypt_heapKiB": -2747
+      },
+      {
+        "slots": 4,
+        "keyBits": 256,
+        "keyStrBytes": null,
+        "msgBytes": 512,
+        "padTo": null,
+        "containerBytes": 9472,
+        "encrypt_ms": 1.031,
+        "encrypt_heapKiB": 1646,
+        "decrypt_ms": 0.528,
+        "decrypt_heapKiB": -2201
+      },
+      {
+        "slots": 4,
+        "keyBits": 256,
+        "keyStrBytes": null,
+        "msgBytes": 2048,
+        "padTo": null,
+        "containerBytes": 33536,
+        "encrypt_ms": 1.6,
+        "encrypt_heapKiB": 580,
+        "decrypt_ms": 1.743,
+        "decrypt_heapKiB": 3566
+      },
+      {
+        "slots": 4,
+        "keyBits": 256,
+        "keyStrBytes": null,
+        "msgBytes": 3072,
+        "padTo": null,
+        "containerBytes": 50944,
+        "encrypt_ms": 1.856,
+        "encrypt_heapKiB": 2761,
+        "decrypt_ms": 2.517,
+        "decrypt_heapKiB": -17
+      }
+    ],
+    "keyBits": [
+      {
+        "slots": 4,
+        "keyBits": 16,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 2560,
+        "encrypt_ms": 0.753,
+        "encrypt_heapKiB": 850,
+        "decrypt_ms": 0.307,
+        "decrypt_heapKiB": 425
+      },
+      {
+        "slots": 4,
+        "keyBits": 32,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 2304,
+        "encrypt_ms": 0.932,
+        "encrypt_heapKiB": -5869,
+        "decrypt_ms": 0.318,
+        "decrypt_heapKiB": 419
+      },
+      {
+        "slots": 4,
+        "keyBits": 64,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 2560,
+        "encrypt_ms": 0.896,
+        "encrypt_heapKiB": 903,
+        "decrypt_ms": 0.289,
+        "decrypt_heapKiB": 427
+      },
+      {
+        "slots": 4,
+        "keyBits": 128,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 2560,
+        "encrypt_ms": 0.776,
+        "encrypt_heapKiB": 866,
+        "decrypt_ms": 0.337,
+        "decrypt_heapKiB": 417
+      },
+      {
+        "slots": 4,
+        "keyBits": 256,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 2560,
+        "encrypt_ms": 0.928,
+        "encrypt_heapKiB": -2014,
+        "decrypt_ms": 0.348,
+        "decrypt_heapKiB": 410
+      },
+      {
+        "slots": 4,
+        "keyBits": 512,
+        "keyStrBytes": null,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 2560,
+        "encrypt_ms": 1.284,
+        "encrypt_heapKiB": 964,
+        "decrypt_ms": 0.334,
+        "decrypt_heapKiB": 418
+      }
+    ],
+    "keyStringLen": [
+      {
+        "slots": 4,
+        "keyBits": 256,
+        "keyStrBytes": 8,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 2304,
+        "encrypt_ms": 1.069,
+        "encrypt_heapKiB": 882,
+        "decrypt_ms": 0.241,
+        "decrypt_heapKiB": 425
+      },
+      {
+        "slots": 4,
+        "keyBits": 256,
+        "keyStrBytes": 32,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 2816,
+        "encrypt_ms": 1.111,
+        "encrypt_heapKiB": 871,
+        "decrypt_ms": 0.283,
+        "decrypt_heapKiB": 417
+      },
+      {
+        "slots": 4,
+        "keyBits": 256,
+        "keyStrBytes": 128,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 2816,
+        "encrypt_ms": 1.129,
+        "encrypt_heapKiB": 1024,
+        "decrypt_ms": 0.387,
+        "decrypt_heapKiB": 417
+      },
+      {
+        "slots": 4,
+        "keyBits": 256,
+        "keyStrBytes": 1024,
+        "msgBytes": 64,
+        "padTo": 69,
+        "containerBytes": 1792,
+        "encrypt_ms": 0.831,
+        "encrypt_heapKiB": 1524,
+        "decrypt_ms": 0.425,
+        "decrypt_heapKiB": 321
+      }
+    ]
+  }
+}

@@ -2,6 +2,9 @@
  * DeniableCipher Web UI — logic + i18n.
  * Loaded after crypto.js (which provides globalThis.DeniableMulti).
  * All crypto runs in the browser; nothing is sent anywhere.
+ *
+ * ⚠️ PROOF OF CONCEPT — NOT FOR PRODUCTION. Educational/research only.
+ * Do not use to protect real secrets. See SECURITY.md.
  */
 "use strict";
 
@@ -13,6 +16,7 @@ const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const I18N = {
   zh: {
     tagline: "多密钥可否认加密",
+    pocBanner: "⚠ 概念验证（PoC）：未审计的加密工程，请勿用于保护真实机密。阅读安全模型。",
     localChip: "仅在本浏览器运行",
     tabEncrypt: "加密",
     tabDecrypt: "解密",
@@ -120,6 +124,7 @@ const I18N = {
 
   en: {
     tagline: "N-key deniable encryption",
+    pocBanner: "⚠ Proof of concept (PoC): unaudited cryptography. Do not use for real secrets. Read the security model.",
     localChip: "Runs only in this browser",
     tabEncrypt: "Encrypt",
     tabDecrypt: "Decrypt",

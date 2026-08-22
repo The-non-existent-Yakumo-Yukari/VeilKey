@@ -3,6 +3,9 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
+# Node (jsdom dev dependency; installed --no-save for tests)
+node_modules/
+
 # PyInstaller build artifacts
 build/
 *.manifest

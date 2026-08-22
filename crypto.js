@@ -1,6 +1,12 @@
 /*
  * DeniableMulti — N-key deniable encryption, ported to the browser.
  *
+ * ⚠️ PROOF OF CONCEPT — NOT FOR PRODUCTION.
+ * This is a research/educational implementation. It has NOT been formally
+ * verified, independently audited, or cryptanalyzed. Do NOT use it to protect
+ * real secrets. See README.md and SECURITY.md for the threat model and the
+ * reasons it is not production-ready.
+ *
  * Byte-for-byte compatible with multi_key/deniable_multi.py (DeniableMulti).
  * One headerless container, N slots, N independent keys. Each key
  * self-locates its own slot: the decryptor never needs to know how many

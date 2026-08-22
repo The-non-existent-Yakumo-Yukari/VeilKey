@@ -1,0 +1,5 @@
+slots,msg_bytes_per_slot,container_bytes,encrypt_ms,decrypt_ms,encrypt_heap_deltaKiB
+4,64,2048,1.487,0.38,1015
+4,512,9472,1.031,0.528,1646
+4,2048,33536,1.6,1.743,580
+4,3072,50944,1.856,2.517,2761

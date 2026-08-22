@@ -1,6 +1,10 @@
 """
 DeniableCipher Web UI — local launcher.
 
+⚠️ PROOF OF CONCEPT — NOT FOR PRODUCTION. Educational/research only.
+The served web app (crypto.js) has not been audited; do not protect real
+secrets with it. See SECURITY.md.
+
 Runs a tiny HTTP server on 127.0.0.1 with a per-run random token in the URL,
 serves the self-contained web app (app.html / app.js / crypto.js), and opens
 the default browser.
